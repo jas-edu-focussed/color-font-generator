@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aesthetic Palette Generator</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            heading: ['Sora', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Sora & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, .font-heading {
+      font-family: 'Sora', sans-serif;
+    }
+    /* Custom scrollbar for clean aesthetic */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen transition-colors duration-300 bg-[#0F172A] text-[#F8FAFC]">
+
+  <!-- Toast Notification Floating Banner -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 hidden items-center gap-3 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 py-3 rounded-2xl shadow-2xl transition-all duration-300 animate-bounce">
+    <i data-lucide="sparkles" class="w-5 h-5 text-amber-400 shrink-0"></i>
+    <span id="toast-message" class="font-medium text-sm">Notification message</span>
+  </div>
+
+  <!-- Header Navbar -->
+  <header class="sticky top-0 z-40 border-b backdrop-blur-md transition-colors bg-[#0F172A]/80 border-[#334155]" id="main-header">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-pink-500 via-indigo-500 to-cyan-400 p-0.5 shadow-md flex items-center justify-center">
+          <div class="w-full h-full bg-[#0F172A] rounded-[14px] flex items-center justify-center">
+            <i data-lucide="palette" class="w-6 h-6 text-pink-400"></i>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-900 to-slate-700 dark:from-white dark:via-indigo-200 dark:to-slate-300">
+            Aesthetic Palette
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Design Tool & Color Engine
+          </p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs (Desktop) -->
+      <nav class="hidden md:flex items-center gap-1 bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-300/40 dark:border-slate-700/50" id="desktop-nav">
+        <button onclick="setTab('generator')" id="tab-btn-generator" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i> Generator
+        </button>
+        <button onclick="setTab('preview')" id="tab-btn-preview" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <i data-lucide="eye" class="w-4 h-4"></i> Live UI Sandbox
+        </button>
+        <button onclick="setTab('accessibility')" id="tab-btn-accessibility" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Contrast Matrix
+        </button>
+        <button onclick="setTab('saved')" id="tab-btn-saved" class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+          <i data-lucide="bookmark" class="w-4 h-4"></i> Saved (<span id="saved-count">0</span>)
+        </button>
+      </nav>
+
+      <!-- Header Tools -->
+      <div class="flex items-center gap-2">
+        
+        <!-- Format Selector -->
+        <div class="hidden sm:flex bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl text-xs font-mono font-medium">
+          <button onclick="setColorFormat('hex')" id="fmt-hex" class="px-2.5 py-1 rounded-lg uppercase transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">HEX</button>
+          <button onclick="setColorFormat('rgb')" id="fmt-rgb" class="px-2.5 py-1 rounded-lg uppercase transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">RGB</button>
+          <button onclick="setColorFormat('hsl')" id="fmt-hsl" class="px-2.5 py-1 rounded-lg uppercase transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">HSL</button>
+        </div>
+
+        <!-- Shortcuts Button -->
+        <button onclick="toggleModal('shortcuts-modal', true)" class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all" title="Keyboard Shortcuts">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button onclick="toggleTheme()" id="theme-btn" class="p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-all" title="Toggle Theme">
+          <i data-lucide="sun" class="w-4 h-4 text-amber-400" id="theme-icon"></i>
+        </button>
+
+        <!-- Export Button -->
+        <button onclick="toggleModal('export-modal', true)" class="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white px-4 py-2.5 rounded-xl text-xs font-semibold shadow-md shadow-indigo-500/20 active:scale-95 transition-all">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Export</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="md:hidden flex border-t border-slate-200 dark:border-slate-800 px-2 py-1.5 justify-around bg-slate-100/50 dark:bg-slate-900/50">
+      <button onclick="setTab('generator')" id="mob-tab-generator" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i> Generator
+      </button>
+      <button onclick="setTab('preview')" id="mob-tab-preview" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-slate-500">
+        <i data-lucide="eye" class="w-4 h-4"></i> Preview
+      </button>
+      <button onclick="setTab('accessibility')" id="mob-tab-accessibility" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-slate-500">
+        <i data-lucide="shield-check" class="w-4 h-4"></i> Matrix
+      </button>
+      <button onclick="setTab('saved')" id="mob-tab-saved" class="flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-slate-500">
+        <i data-lucide="bookmark" class="w-4 h-4"></i> Saved
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    
+    <!-- Aesthetic Selector & Controls Bar -->
+    <div class="mb-8 bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] p-5 rounded-3xl shadow-sm transition-all" id="control-bar">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        
+        <!-- Aesthetic Category Grid -->
+        <div class="flex-1">
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">
+            Aesthetic Style Rules
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2" id="aesthetic-buttons">
+            <!-- Rendered by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="flex items-center gap-3 self-end lg:self-center">
+          
+          <!-- Undo / Redo -->
+          <div class="flex items-center border border-slate-200 dark:border-slate-700 rounded-2xl overflow-hidden bg-slate-50 dark:bg-slate-800">
+            <button onclick="handleUndo()" id="btn-undo" class="px-3 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-all" title="Undo (Ctrl+Z)">
+              <i data-lucide="refresh-cw" class="w-4 h-4 transform -scale-x-100"></i>
+            </button>
+            <div class="w-[1px] h-6 bg-slate-200 dark:bg-slate-700"></div>
+            <button onclick="handleRedo()" id="btn-redo" class="px-3 py-3 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-30 transition-all" title="Redo">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </button>
+          </div>
+
+          <!-- Save Favorite -->
+          <button onclick="saveCurrentPalette()" class="flex items-center gap-2 px-4 py-3 rounded-2xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition-all active:scale-95">
+            <i data-lucide="bookmark" class="w-4 h-4 text-amber-500"></i>
+            <span>Save Favorite</span>
+          </button>
+
+          <!-- Main Generate Button -->
+          <button onclick="generatePalette()" class="flex items-center gap-2.5 bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-semibold text-xs shadow-lg shadow-indigo-600/30 active:scale-95 transition-all">
+            <i data-lucide="sparkles" class="w-4 h-4 animate-pulse"></i>
+            <span>Generate (Space)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: GENERATOR CANVAS -->
+    <div id="view-generator" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4 min-h-[460px]" id="palette-grid">
+        <!-- Rendered by JavaScript -->
+      </div>
+
+      <div class="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between text-xs text-indigo-900 dark:text-indigo-300">
+        <div class="flex items-center gap-2">
+          <i data-lucide="info" class="w-4 h-4 text-indigo-500 shrink-0"></i>
+          <span>
+            <strong>Tip:</strong> Press <kbd class="px-1.5 py-0.5 rounded bg-indigo-200/60 dark:bg-indigo-900/80 font-mono">Space</kbd> to instantly generate colors, or click any lock icon to freeze favorite slots.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: LIVE UI SANDBOX PREVIEW -->
+    <div id="view-preview" class="space-y-6 hidden">
+      <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] p-4 rounded-3xl flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h3 class="text-sm font-bold">Interactive Design System Preview</h3>
+          <p class="text-xs text-slate-500">Live preview showing how this 5-color palette maps to a real web layout.</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap" id="preview-color-tokens">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <!-- Live Sandbox Box -->
+      <div id="sandbox-frame" class="rounded-3xl border shadow-xl overflow-hidden transition-colors duration-300">
+        <!-- Sandbox Nav -->
+        <header id="sandbox-nav" class="px-8 py-5 border-b flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div id="sandbox-logo" class="w-8 h-8 rounded-xl flex items-center justify-center font-bold shadow-sm">A</div>
+            <span class="font-bold tracking-tight text-sm">Aesthetic Studio</span>
+          </div>
+
+          <div class="flex items-center gap-6 text-xs font-medium">
+            <span>Products</span>
+            <span>Showcase</span>
+            <span>Pricing</span>
+            <button id="sandbox-btn-primary" class="px-4 py-2 rounded-xl font-semibold shadow-sm text-xs transition-transform hover:scale-105">
+              Get Started
+            </button>
+          </div>
+        </header>
+
+        <!-- Sandbox Hero -->
+        <div class="p-10 md:p-16 max-w-4xl mx-auto text-center space-y-6">
+          <span id="sandbox-badge" class="inline-block px-4 py-1.5 rounded-full text-xs font-bold tracking-wide uppercase shadow-xs">
+            New Aesthetic System
+          </span>
+
+          <h2 id="sandbox-heading" class="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+            Create Visually Stunning Digital Experiences
+          </h2>
+
+          <p id="sandbox-subtext" class="text-sm md:text-base max-w-xl mx-auto opacity-80 font-normal leading-relaxed">
+            Harmonized color palettes tailored specifically to your project's vibe. Built for frontend engineers and creators.
+          </p>
+
+          <div class="flex items-center justify-center gap-4 pt-4">
+            <button id="sandbox-cta-1" class="px-6 py-3 rounded-2xl text-xs font-bold shadow-lg transition-transform hover:scale-105">
+              Explore Components
+            </button>
+            <button id="sandbox-cta-2" class="px-6 py-3 rounded-2xl text-xs font-bold border backdrop-blur-xs transition-transform hover:scale-105">
+              Documentation
+            </button>
+          </div>
+
+          <!-- Feature Cards Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 text-left" id="sandbox-cards">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: WCAG CONTRAST MATRIX -->
+    <div id="view-accessibility" class="space-y-6 hidden">
+      <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] p-6 rounded-3xl shadow-sm">
+        <div class="flex items-center gap-3 mb-2">
+          <i data-lucide="shield-check" class="w-6 h-6 text-emerald-500"></i>
+          <h3 class="text-lg font-bold">WCAG 2.1 Contrast Matrix</h3>
+        </div>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Contrast ratios calculated across all 5 colors. Minimum recommendation for regular text is 4.5:1 (AA) and 7:1 (AAA).
+        </p>
+      </div>
+
+      <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] rounded-3xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse" id="matrix-table">
+            <!-- Rendered by JavaScript -->
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: SAVED FAVORITES -->
+    <div id="view-saved" class="space-y-6 hidden">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold">Saved Favorite Palettes</h3>
+          <p class="text-xs text-slate-500">Your locally stored favorite color combinations.</p>
+        </div>
+        <span class="text-xs font-semibold px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400" id="saved-badge-count">
+          0 Palettes
+        </span>
+      </div>
+
+      <div id="saved-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+  </main>
+
+  <!-- EXPORT MODAL -->
+  <div id="export-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-6">
+      <div class="flex items-center justify-between border-b pb-4 dark:border-slate-700">
+        <div class="flex items-center gap-2">
+          <i data-lucide="code" class="w-5 h-5 text-indigo-500"></i>
+          <h3 class="font-bold text-lg">Export Palette</h3>
+        </div>
+        <button onclick="toggleModal('export-modal', false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
+      </div>
+
+      <!-- PNG Download Banner -->
+      <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between">
+        <div>
+          <h4 class="font-bold text-xs text-indigo-900 dark:text-indigo-200">Export High-Res Image (PNG)</h4>
+          <p class="text-[11px] text-indigo-700 dark:text-indigo-400">Download a clean presentation graphic ready for Socials / Figma.</p>
+        </div>
+        <button onclick="downloadPNG()" class="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-xl text-xs font-semibold shadow-md hover:bg-indigo-500 transition-all">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Download PNG
+        </button>
+      </div>
+
+      <!-- CSS Variables Code -->
+      <div class="space-y-4">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500 uppercase">CSS Variables</span>
+            <button onclick="copyExportText('css')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copy CSS
+            </button>
+          </div>
+          <pre id="export-css-code" class="p-4 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto"></pre>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-500 uppercase">Tailwind CSS Config</span>
+            <button onclick="copyExportText('tailwind')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+              <i data-lucide="copy" class="w-3 h-3"></i> Copy Config
+            </button>
+          </div>
+          <pre id="export-tailwind-code" class="p-4 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs overflow-x-auto max-h-36"></pre>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="toggleModal('export-modal', false)" class="px-5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-semibold">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHORTCUTS MODAL -->
+  <div id="shortcuts-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-6">
+      <div class="flex items-center justify-between border-b pb-4 dark:border-slate-700">
+        <div class="flex items-center gap-2">
+          <i data-lucide="zap" class="w-5 h-5 text-amber-500"></i>
+          <h3 class="font-bold text-lg">Keyboard Shortcuts</h3>
+        </div>
+        <button onclick="toggleModal('shortcuts-modal', false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">✕</button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <span class="text-slate-600 dark:text-slate-300 font-medium">Generate new unlocked colors</span>
+          <kbd class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono font-bold shadow-xs">Spacebar</kbd>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <span class="text-slate-600 dark:text-slate-300 font-medium">Save current palette to favorites</span>
+          <kbd class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono font-bold shadow-xs">S</kbd>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <span class="text-slate-600 dark:text-slate-300 font-medium">Open export dialog</span>
+          <kbd class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono font-bold shadow-xs">E</kbd>
+        </div>
+        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800">
+          <span class="text-slate-600 dark:text-slate-300 font-medium">Undo last palette generation</span>
+          <kbd class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 font-mono font-bold shadow-xs">Ctrl + Z</kbd>
+        </div>
+      </div>
+
+      <div class="pt-2 flex justify-end">
+        <button onclick="toggleModal('shortcuts-modal', false)" class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-semibold">
+          Got it
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- COLOR CONVERSION & UTILITY FUNCTIONS ---
+    const hexToRgb = (hex) => {
+      let cleanHex = hex.replace('#', '');
+      if (cleanHex.length === 3) {
+        cleanHex = cleanHex.split('').map(c => c + c).join('');
+      }
+      const num = parseInt(cleanHex, 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255
+      };
+    };
+
+    const rgbToHex = ({ r, g, b }) => {
+      const toHex = (c) => Math.max(0, Math.min(255, Math.round(c))).toString(16).padStart(2, '0');
+      return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
+    };
+
+    const rgbToHsl = ({ r, g, b }) => {
+      r /= 255; g /= 255; b /= 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      let h = 0, s = 0, l = (max + min) / 2;
+
+      if (max !== min) {
+        const d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch (max) {
+          case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+          case g: h = (b - r) / d + 2; break;
+          case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+      }
+      return {
+        h: Math.round(h * 360),
+        s: Math.round(s * 100),
+        l: Math.round(l * 100)
+      };
+    };
+
+    const hslToRgb = ({ h, s, l }) => {
+      h /= 360; s /= 100; l /= 100;
+      let r, g, b;
+
+      if (s === 0) {
+        r = g = b = l;
+      } else {
+        const hue2rgb = (p, q, t) => {
+          if (t < 0) t += 1;
+          if (t > 1) t -= 1;
+          if (t < 1/6) return p + (q - p) * 6 * t;
+          if (t < 1/2) return q;
+          if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+          return p;
+        };
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+      }
+      return {
+        r: Math.round(r * 255),
+        g: Math.round(g * 255),
+        b: Math.round(b * 255)
+      };
+    };
+
+    const getLuminance = ({ r, g, b }) => {
+      const a = [r, g, b].map(v => {
+        v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+      });
+      return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+    };
+
+    const getContrastRatio = (hex1, hex2) => {
+      const lum1 = getLuminance(hexToRgb(hex1));
+      const lum2 = getLuminance(hexToRgb(hex2));
+      const brightest = Math.max(lum1, lum2);
+      const darkest = Math.min(lum1, lum2);
+      return (brightest + 0.05) / (darkest + 0.05);
+    };
+
+    const getColorName = ({ h, s, l }) => {
+      if (l < 12) return 'Obsidian Dark';
+      if (l > 92) return 'Porcelain White';
+      if (s < 10) {
+        if (l < 30) return 'Charcoal Slate';
+        if (l < 70) return 'Neutral Fog';
+        return 'Alabaster Grey';
+      }
+
+      let hueName = '';
+      if (h >= 345 || h < 15) hueName = 'Crimson';
+      else if (h < 40) hueName = 'Coral Red';
+      else if (h < 65) hueName = 'Amber Gold';
+      else if (h < 150) hueName = 'Emerald Sage';
+      else if (h < 200) hueName = 'Teal Cyan';
+      else if (h < 260) hueName = 'Sapphire Blue';
+      else if (h < 315) hueName = 'Amethyst Violet';
+      else hueName = 'Magenta Rose';
+
+      if (l > 75) return `Soft ${hueName}`;
+      if (l < 30) return `Deep ${hueName}`;
+      if (s > 80) return `Vibrant ${hueName}`;
+      if (s < 40) return `Muted ${hueName}`;
+      return hueName;
+    };
+
+    const AESTHETICS = {
+      pastel: {
+        id: 'pastel',
+        name: 'Pastel Dream',
+        badge: 'Soft & Ethereal',
+        generate: () => {
+          const baseHue = Math.floor(Math.random() * 360);
+          return Array.from({ length: 5 }, (_, i) => ({
+            h: (baseHue + i * 45 + Math.floor(Math.random() * 20 - 10)) % 360,
+            s: Math.floor(Math.random() * 25) + 45,
+            l: Math.floor(Math.random() * 15) + 78
+          }));
+        }
+      },
+      minimalist: {
+        id: 'minimalist',
+        name: 'Minimalist Monochromes',
+        badge: 'Sleek & Clean',
+        generate: () => {
+          const baseHue = Math.floor(Math.random() * 360);
+          const isWarm = Math.random() > 0.5;
+          const h = isWarm ? 35 : 210;
+          return [
+            { h, s: 8, l: 96 },
+            { h, s: 12, l: 82 },
+            { h, s: 15, l: 55 },
+            { h, s: 20, l: 28 },
+            { h: baseHue, s: 65, l: 50 }
+          ];
+        }
+      },
+      cyberpunk: {
+        id: 'cyberpunk',
+        name: 'Cyberpunk Neon',
+        badge: 'Electric & High Contrast',
+        generate: () => {
+          const neons = [
+            { h: 320, s: 95, l: 55 },
+            { h: 185, s: 95, l: 50 },
+            { h: 275, s: 90, l: 60 },
+            { h: 55, s: 100, l: 50 },
+            { h: 240, s: 80, l: 12 }
+          ];
+          return neons.sort(() => Math.random() - 0.5);
+        }
+      },
+      vaporwave: {
+        id: 'vaporwave',
+        name: 'Vaporwave 80s',
+        badge: 'Retro Synthetic',
+        generate: () => {
+          return [
+            { h: 325, s: 85, l: 65 },
+            { h: 290, s: 75, l: 60 },
+            { h: 250, s: 70, l: 68 },
+            { h: 180, s: 80, l: 65 },
+            { h: 35, s: 90, l: 75 }
+          ].map(c => ({
+            h: (c.h + Math.floor(Math.random() * 16 - 8)) % 360,
+            s: Math.min(100, Math.max(40, c.s + Math.floor(Math.random() * 10 - 5))),
+            l: c.l
+          }));
+        }
+      },
+      darkAcademia: {
+        id: 'darkAcademia',
+        name: 'Dark Academia',
+        badge: 'Vintage & Scholarly',
+        generate: () => {
+          return [
+            { h: 25, s: 35, l: 15 },
+            { h: 35, s: 45, l: 28 },
+            { h: 42, s: 60, l: 45 },
+            { h: 145, s: 30, l: 22 },
+            { h: 38, s: 25, l: 85 }
+          ].sort(() => Math.random() - 0.5);
+        }
+      },
+      nature: {
+        id: 'nature',
+        name: 'Organic Earth',
+        badge: 'Harmonious & Earthy',
+        generate: () => {
+          return [
+            { h: 110, s: 35, l: 40 },
+            { h: 80, s: 28, l: 52 },
+            { h: 22, s: 55, l: 50 },
+            { h: 38, s: 40, l: 78 },
+            { h: 200, s: 20, l: 38 }
+          ].map(c => ({ ...c, h: (c.h + Math.floor(Math.random() * 12 - 6)) % 360 }));
+        }
+      },
+      retro: {
+        id: 'retro',
+        name: 'Mid-Century Retro',
+        badge: 'Warm & Nostalgic',
+        generate: () => {
+          return [
+            { h: 18, s: 78, l: 48 },
+            { h: 45, s: 85, l: 52 },
+            { h: 85, s: 42, l: 40 },
+            { h: 190, s: 50, l: 38 },
+            { h: 40, s: 35, l: 88 }
+          ].sort(() => Math.random() - 0.5);
+        }
+      },
+      scandinavian: {
+        id: 'scandinavian',
+        name: 'Nordic Minimal',
+        badge: 'Light & Balanced',
+        generate: () => {
+          return [
+            { h: 210, s: 15, l: 94 },
+            { h: 140, s: 18, l: 75 },
+            { h: 30, s: 25, l: 82 },
+            { h: 205, s: 22, l: 45 },
+            { h: 220, s: 15, l: 20 }
+          ];
+        }
+      }
+    };
+
+    let state = {
+      theme: localStorage.getItem('apg_theme') || 'dark',
+      currentAesthetic: 'pastel',
+      palette: [],
+      savedPalettes: JSON.parse(localStorage.getItem('apg_saved_palettes') || '[]'),
+      history: [],
+      historyIndex: -1,
+      activeTab: 'generator',
+      colorFormat: 'hex'
+    };
+
+    const createColorToken = (hsl, isLocked = false, existingToken = null) => {
+      if (existingToken && existingToken.locked) return existingToken;
+      const rgb = hslToRgb(hsl);
+      const hex = rgbToHex(rgb);
+      const name = getColorName(hsl);
+      return {
+        id: `col-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
+        hex,
+        rgb,
+        hsl,
+        name,
+        locked: isLocked
+      };
+    };
+
+    function generatePalette(aestheticKey = state.currentAesthetic) {
+      state.currentAesthetic = aestheticKey;
+      const generator = AESTHETICS[aestheticKey] || AESTHETICS.pastel;
+      const hslList = generator.generate();
+
+      const newPalette = hslList.map((hsl, index) => {
+        const existing = state.palette[index];
+        if (existing && existing.locked) return existing;
+        return createColorToken(hsl);
+      });
+
+      state.palette = newPalette;
+
+      // Update history
+      state.history = state.history.slice(0, state.historyIndex + 1);
+      state.history.push(newPalette);
+      state.historyIndex = state.history.length - 1;
+
+      render();
+    }
+
+    function toggleLock(index) {
+      state.palette[index].locked = !state.palette[index].locked;
+      render();
+    }
+
+    function updateColorHex(index, newHex) {
+      if (!/^#[0-9A-F]{6}$/i.test(newHex)) return;
+      const rgb = hexToRgb(newHex);
+      const hsl = rgbToHsl(rgb);
+      const name = getColorName(hsl);
+      state.palette[index] = {
+        ...state.palette[index],
+        hex: newHex.toUpperCase(),
+        rgb,
+        hsl,
+        name
+      };
+      render();
+    }
+
+    function handleUndo() {
+      if (state.historyIndex > 0) {
+        state.historyIndex--;
+        state.palette = state.history[state.historyIndex];
+        showToast('Undone to previous palette');
+        render();
+      }
+    }
+
+    function handleRedo() {
+      if (state.historyIndex < state.history.length - 1) {
+        state.historyIndex++;
+        state.palette = state.history[state.historyIndex];
+        showToast('Redone to next palette');
+        render();
+      }
+    }
+
+    function saveCurrentPalette() {
+      const isAlreadySaved = state.savedPalettes.some(p => 
+        p.colors.map(c => c.hex).join('-') === state.palette.map(c => c.hex).join('-')
+      );
+
+      if (isAlreadySaved) {
+        showToast('Palette already saved in favorites!');
+        return;
+      }
+
+      const savedObject = {
+        id: `pal-${Date.now()}`,
+        aesthetic: state.currentAesthetic,
+        aestheticName: AESTHETICS[state.currentAesthetic].name,
+        createdAt: new Date().toLocaleDateString(),
+        colors: state.palette.map(c => ({ ...c, locked: false }))
+      };
+
+      state.savedPalettes.unshift(savedObject);
+      localStorage.setItem('apg_saved_palettes', JSON.stringify(state.savedPalettes));
+      showToast('Saved palette to favorites!');
+      render();
+    }
+
+    function deleteSavedPalette(id) {
+      state.savedPalettes = state.savedPalettes.filter(p => p.id !== id);
+      localStorage.setItem('apg_saved_palettes', JSON.stringify(state.savedPalettes));
+      showToast('Removed palette from favorites.');
+      render();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-message');
+      toastMsg.innerText = msg;
+      toast.classList.remove('hidden');
+      toast.classList.add('flex');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+        toast.classList.remove('flex');
+      }, 2500);
+    }
+
+    function handleCopy(text, label = 'Color') {
+      navigator.clipboard.writeText(text);
+      showToast(`Copied ${label}: ${text}`);
+    }
+
+    function setTheme(newTheme) {
+      state.theme = newTheme;
+      localStorage.setItem('apg_theme', state.theme);
+      const root = document.documentElement;
+      const themeIcon = document.getElementById('theme-icon');
+      const header = document.getElementById('main-header');
+
+      if (state.theme === 'dark') {
+        root.classList.add('dark');
+        themeIcon.setAttribute('data-lucide', 'sun');
+        themeIcon.className = 'w-4 h-4 text-amber-400';
+        header.className = 'sticky top-0 z-40 border-b backdrop-blur-md transition-colors bg-[#0F172A]/80 border-[#334155]';
+      } else {
+        root.classList.remove('dark');
+        themeIcon.setAttribute('data-lucide', 'moon');
+        themeIcon.className = 'w-4 h-4 text-indigo-600';
+        header.className = 'sticky top-0 z-40 border-b backdrop-blur-md transition-colors bg-[#FAFAFA]/80 border-[#E5E7EB]';
+      }
+      lucide.createIcons();
+    }
+
+    function toggleTheme() {
+      setTheme(state.theme === 'dark' ? 'light' : 'dark');
+    }
+
+    function setTab(tab) {
+      state.activeTab = tab;
+      
+      ['generator', 'preview', 'accessibility', 'saved'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const desktopBtn = document.getElementById(`tab-btn-${t}`);
+        const mobBtn = document.getElementById(`mob-tab-${t}`);
+
+        if (t === tab) {
+          view.classList.remove('hidden');
+          desktopBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-sm";
+          mobBtn.className = "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50";
+        } else {
+          view.classList.add('hidden');
+          desktopBtn.className = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+          mobBtn.className = "flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-slate-500";
+        }
+      });
+
+      render();
+    }
+
+    function setColorFormat(fmt) {
+      state.colorFormat = fmt;
+      ['hex', 'rgb', 'hsl'].forEach(f => {
+        const btn = document.getElementById(`fmt-${f}`);
+        if (f === fmt) {
+          btn.className = "px-2.5 py-1 rounded-lg uppercase transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-lg uppercase transition-all text-slate-500 hover:text-slate-800 dark:hover:text-slate-200";
+        }
+      });
+      render();
+    }
+
+    function toggleModal(id, show) {
+      const modal = document.getElementById(id);
+      if (show) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        if (id === 'export-modal') updateExportCodes();
+      } else {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+      }
+    }
+
+    function render() {
+      // 1. Render Aesthetic Selector Buttons
+      const aesContainer = document.getElementById('aesthetic-buttons');
+      aesContainer.innerHTML = Object.keys(AESTHETICS).map(key => {
+        const aes = AESTHETICS[key];
+        const isSelected = state.currentAesthetic === key;
+        return `
+          <button onclick="generatePalette('${key}')" class="p-2.5 rounded-2xl text-left border transition-all text-xs flex flex-col justify-between ${
+            isSelected 
+              ? 'border-indigo-500 bg-indigo-50/60 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 font-bold ring-2 ring-indigo-500/20' 
+              : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-800/40'
+          }">
+            <span class="truncate">${aes.name}</span>
+            <span class="text-[10px] opacity-75 font-normal mt-1 truncate">${aes.badge}</span>
+          </button>
+        `;
+      }).join('');
+
+      // Update Undo / Redo disabled states
+      document.getElementById('btn-undo').disabled = state.historyIndex <= 0;
+      document.getElementById('btn-redo').disabled = state.historyIndex >= state.history.length - 1;
+
+      // 2. Render Generator Palette Grid
+      if (state.activeTab === 'generator') {
+        const pGrid = document.getElementById('palette-grid');
+        pGrid.innerHTML = state.palette.map((color, index) => {
+          const isDark = getLuminance(color.rgb) < 0.45;
+          const displayValue = state.colorFormat === 'rgb' 
+            ? `rgb(${color.rgb.r}, ${color.rgb.g}, ${color.rgb.b})` 
+            : state.colorFormat === 'hsl' 
+            ? `hsl(${color.hsl.h}, ${color.hsl.s}%, ${color.hsl.l}%)` 
+            : color.hex;
+
+          return `
+            <div class="relative group rounded-3xl transition-all duration-300 p-6 flex flex-col justify-between shadow-sm hover:shadow-xl border border-black/5 dark:border-white/10 overflow-hidden" style="background-color: ${color.hex}">
+              
+              <div class="flex items-center justify-between z-10">
+                <button onclick="toggleLock(${index})" class="p-3 rounded-2xl backdrop-blur-md transition-all ${
+                  color.locked 
+                    ? 'bg-black/40 text-white ring-2 ring-white/50' 
+                    : 'bg-white/20 hover:bg-white/40 text-slate-900 dark:text-white opacity-80 group-hover:opacity-100'
+                }" title="${color.locked ? 'Locked' : 'Unlocked'}">
+                  <i data-lucide="${color.locked ? 'lock' : 'unlock'}" class="w-4 h-4"></i>
+                </button>
+
+                <button onclick="handleCopy('${displayValue}', '${state.colorFormat.toUpperCase()}')" class="p-3 rounded-2xl bg-white/20 hover:bg-white/40 text-slate-900 dark:text-white backdrop-blur-md opacity-80 group-hover:opacity-100 transition-all">
+                  <i data-lucide="copy" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <div class="my-auto text-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                <span class="text-xs uppercase font-mono font-bold tracking-widest px-3 py-1 rounded-full backdrop-blur-md ${
+                  isDark ? 'bg-white/20 text-white' : 'bg-black/20 text-black'
+                }">Slot 0${index + 1}</span>
+              </div>
+
+              <div class="z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-white/20 shadow-lg transition-all">
+                <div class="flex items-center justify-between mb-1">
+                  <input type="text" value="${color.hex}" onchange="updateColorHex(${index}, this.value)" class="font-mono font-bold text-base bg-transparent border-b border-transparent hover:border-slate-400 focus:border-indigo-500 focus:outline-none text-slate-900 dark:text-white w-28 uppercase" />
+                  <input type="color" value="${color.hex}" onchange="updateColorHex(${index}, this.value)" class="w-6 h-6 rounded-full border-0 cursor-pointer overflow-hidden p-0" />
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-300 font-medium truncate">${color.name}</p>
+                <p class="text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-1 truncate">${displayValue}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // 3. Render Live UI Preview Sandbox
+      if (state.activeTab === 'preview' && state.palette.length === 5) {
+        const tokens = [
+          { label: 'Bg', hex: state.palette[0].hex },
+          { label: 'Primary', hex: state.palette[1].hex },
+          { label: 'Accent', hex: state.palette[2].hex }
+        ];
+        document.getElementById('preview-color-tokens').innerHTML = `
+          <span class="text-xs text-slate-400">Mapping:</span>
+          ${tokens.map(t => `
+            <span class="inline-flex items-center gap-1.5 text-xs font-mono font-medium px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800">
+              <span class="w-3 h-3 rounded-full" style="background-color: ${t.hex}"></span> ${t.label}
+            </span>
+          `).join('')}
+        `;
+
+        const frame = document.getElementById('sandbox-frame');
+        const bgHex = state.palette[0].hex;
+        const priHex = state.palette[1].hex;
+        const accHex = state.palette[2].hex;
+        const borderHex = state.palette[3].hex;
+        const cardBgHex = state.palette[4].hex;
+
+        const isBgDark = getLuminance(hexToRgb(bgHex)) < 0.45;
+        const isPriDark = getLuminance(hexToRgb(priHex)) < 0.45;
+        const isAccDark = getLuminance(hexToRgb(accHex)) < 0.45;
+        const isCardDark = getLuminance(hexToRgb(cardBgHex)) < 0.45;
+
+        frame.style.backgroundColor = bgHex;
+        frame.style.borderColor = borderHex;
+
+        const nav = document.getElementById('sandbox-nav');
+        nav.style.borderColor = `${borderHex}40`;
+        nav.style.color = isBgDark ? '#FFFFFF' : '#111827';
+
+        const logo = document.getElementById('sandbox-logo');
+        logo.style.backgroundColor = priHex;
+        logo.style.color = isPriDark ? '#FFFFFF' : '#111827';
+
+        const btnPri = document.getElementById('sandbox-btn-primary');
+        btnPri.style.backgroundColor = priHex;
+        btnPri.style.color = isPriDark ? '#FFFFFF' : '#111827';
+
+        const badge = document.getElementById('sandbox-badge');
+        badge.style.backgroundColor = accHex;
+        badge.style.color = isAccDark ? '#FFFFFF' : '#111827';
+
+        const heading = document.getElementById('sandbox-heading');
+        heading.style.color = isBgDark ? '#FFFFFF' : '#111827';
+
+        const subtext = document.getElementById('sandbox-subtext');
+        subtext.style.color = isBgDark ? '#E2E8F0' : '#475569';
+
+        const cta1 = document.getElementById('sandbox-cta-1');
+        cta1.style.backgroundColor = priHex;
+        cta1.style.color = isPriDark ? '#FFFFFF' : '#111827';
+
+        const cta2 = document.getElementById('sandbox-cta-2');
+        cta2.style.backgroundColor = cardBgHex;
+        cta2.style.borderColor = borderHex;
+        cta2.style.color = isCardDark ? '#FFFFFF' : '#111827';
+
+        const cards = [
+          { title: 'Color Theory Engine', desc: 'Automated harmony calculations based on HSL color spaces.' },
+          { title: 'Accessibility First', desc: 'Built-in WCAG contrast verification for readable typography.' },
+          { title: 'Production Export', desc: 'Instant export to Tailwind CSS, raw JSON, or CSS Variables.' }
+        ];
+
+        document.getElementById('sandbox-cards').innerHTML = cards.map((c, i) => `
+          <div class="p-6 rounded-2xl border shadow-sm space-y-3" style="background-color: ${cardBgHex}; border-color: ${borderHex}60; color: ${isCardDark ? '#FFFFFF' : '#111827'}">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold" style="background-color: ${accHex}; color: ${isAccDark ? '#FFFFFF' : '#111827'}">
+              0${i + 1}
+            </div>
+            <h4 class="font-bold text-sm">${c.title}</h4>
+            <p class="text-xs opacity-75 leading-relaxed">${c.desc}</p>
+          </div>
+        `).join('');
+      }
+
+      // 4. Render Contrast Matrix
+      if (state.activeTab === 'accessibility') {
+        const table = document.getElementById('matrix-table');
+        let html = `
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-xs font-bold text-slate-500">
+              <th class="p-4">Text \ Bg Color</th>
+              ${state.palette.map(bgCol => `
+                <th class="p-4 text-center">
+                  <div class="flex flex-col items-center gap-1">
+                    <span class="w-5 h-5 rounded-full border border-black/10" style="background-color: ${bgCol.hex}"></span>
+                    <span class="font-mono text-[10px]">${bgCol.hex}</span>
+                  </div>
+                </th>
+              `).join('')}
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+            ${state.palette.map((textCol, rIdx) => `
+              <tr>
+                <td class="p-4 font-semibold">
+                  <div class="flex items-center gap-2">
+                    <span class="w-4 h-4 rounded-full border" style="background-color: ${textCol.hex}"></span>
+                    <span class="font-mono">${textCol.hex}</span>
+                  </div>
+                </td>
+                ${state.palette.map((bgCol, cIdx) => {
+                  if (rIdx === cIdx) return `<td class="p-4 text-center text-slate-300 dark:text-slate-700 bg-slate-50/50 dark:bg-slate-900/50">—</td>`;
+                  const ratio = getContrastRatio(textCol.hex, bgCol.hex);
+                  const passesAA = ratio >= 4.5;
+                  const passesAAA = ratio >= 7.0;
+                  return `
+                    <td class="p-4 text-center">
+                      <div class="p-2 rounded-xl text-center space-y-1" style="background-color: ${bgCol.hex}; color: ${textCol.hex}">
+                        <div class="font-mono font-bold text-xs">${ratio.toFixed(1)}:1</div>
+                        <div class="flex justify-center gap-1 text-[9px] font-bold">
+                          <span class="px-1.5 py-0.5 rounded ${passesAA ? 'bg-emerald-500 text-white' : 'bg-rose-500/80 text-white'}">AA</span>
+                          <span class="px-1.5 py-0.5 rounded ${passesAAA ? 'bg-emerald-600 text-white' : 'bg-slate-500/40 text-white'}">AAA</span>
+                        </div>
+                      </div>
+                    </td>
+                  `;
+                }).join('')}
+              </tr>
+            `).join('')}
+          </tbody>
+        `;
+        table.innerHTML = html;
+      }
+
+      // 5. Render Saved Palettes Tab
+      const savedCountElem = document.getElementById('saved-count');
+      const savedBadgeElem = document.getElementById('saved-badge-count');
+      savedCountElem.innerText = state.savedPalettes.length;
+      savedBadgeElem.innerText = `${state.savedPalettes.length} Palettes`;
+
+      if (state.activeTab === 'saved') {
+        const savedGrid = document.getElementById('saved-grid');
+        if (state.savedPalettes.length === 0) {
+          savedGrid.innerHTML = `
+            <div class="col-span-2 text-center py-16 bg-white dark:bg-[#1E293B] border border-dashed border-slate-300 dark:border-slate-700 rounded-3xl space-y-3">
+              <i data-lucide="bookmark" class="w-10 h-10 mx-auto text-slate-400"></i>
+              <h4 class="font-bold text-base">No Saved Palettes Yet</h4>
+              <p class="text-xs text-slate-500 max-w-sm mx-auto">
+                Click the "Save Favorite" button while generating to collect your favorite color palettes here.
+              </p>
+            </div>
+          `;
+        } else {
+          savedGrid.innerHTML = state.savedPalettes.map(saved => `
+            <div class="bg-white dark:bg-[#1E293B] border border-[#E5E7EB] dark:border-[#334155] p-5 rounded-3xl shadow-sm hover:shadow-md transition-all space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">${saved.aestheticName}</span>
+                  <p class="text-[10px] text-slate-400">Saved on ${saved.createdAt}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="loadSavedPalette('${saved.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold text-xs hover:bg-indigo-100 transition-all">Load</button>
+                  <button onclick="deleteSavedPalette('${saved.id}')" class="p-1.5 rounded-xl text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-all"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                </div>
+              </div>
+              <div class="h-20 rounded-2xl overflow-hidden flex shadow-inner border border-black/5">
+                ${saved.colors.map(c => `
+                  <div onclick="handleCopy('${c.hex}', 'HEX')" class="flex-1 h-full flex flex-col justify-end p-2 cursor-pointer group relative" style="background-color: ${c.hex}">
+                    <span class="text-[9px] font-mono font-bold px-1 rounded bg-black/40 text-white backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity truncate">${c.hex}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('');
+        }
+      }
+
+      lucide.createIcons();
+    }
+
+    function loadSavedPalette(id) {
+      const saved = state.savedPalettes.find(p => p.id === id);
+      if (saved) {
+        state.palette = saved.colors;
+        setTab('generator');
+        showToast('Loaded saved palette into generator!');
+      }
+    }
+
+    function updateExportCodes() {
+      const css = `:root {\n` + state.palette.map((c, i) => `  --color-${i + 1}: ${c.hex}; /* ${c.name} */`).join('\n') + `\n}`;
+      document.getElementById('export-css-code').innerText = css;
+
+      const config = state.palette.reduce((acc, c, i) => {
+        acc[`brand-${i + 1}`] = c.hex;
+        return acc;
+      }, {});
+      const tw = `// tailwind.config.js\nmodule.exports = {\n  theme: {\n    extend: {\n      colors: ${JSON.stringify(config, null, 8)}\n    }\n  }\n}`;
+      document.getElementById('export-tailwind-code').innerText = tw;
+    }
+
+    function copyExportText(type) {
+      if (type === 'css') {
+        navigator.clipboard.writeText(document.getElementById('export-css-code').innerText);
+        showToast('Copied CSS Variables!');
+      } else if (type === 'tailwind') {
+        navigator.clipboard.writeText(document.getElementById('export-tailwind-code').innerText);
+        showToast('Copied Tailwind Configuration!');
+      }
+    }
+
+    function downloadPNG() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 630;
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = state.theme === 'dark' ? '#0F172A' : '#FAFAFA';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = state.theme === 'dark' ? '#F8FAFC' : '#111827';
+      ctx.font = 'bold 36px Sora, sans-serif';
+      ctx.fillText('Aesthetic Palette Generator', 60, 70);
+
+      ctx.fillStyle = '#6B7280';
+      ctx.font = '20px Inter, sans-serif';
+      ctx.fillText(`Style: ${AESTHETICS[state.currentAesthetic].name}  •  5-Color Harmony`, 60, 105);
+
+      const cardWidth = 200;
+      const cardHeight = 400;
+      const startX = 60;
+      const startY = 140;
+      const gap = 20;
+
+      state.palette.forEach((color, i) => {
+        const x = startX + i * (cardWidth + gap);
+
+        ctx.fillStyle = color.hex;
+        ctx.beginPath();
+        ctx.roundRect(x, startY, cardWidth, cardHeight, 16);
+        ctx.fill();
+
+        const luminance = getLuminance(color.rgb);
+        const isDarkColor = luminance < 0.4;
+
+        ctx.fillStyle = isDarkColor ? 'rgba(255, 255, 255, 0.9)' : 'rgba(17, 24, 39, 0.9)';
+        ctx.beginPath();
+        ctx.roundRect(x + 12, startY + cardHeight - 110, cardWidth - 24, 96, 12);
+        ctx.fill();
+
+        ctx.fillStyle = isDarkColor ? '#111827' : '#FFFFFF';
+        ctx.font = 'bold 22px Inter, monospace';
+        ctx.fillText(color.hex, x + 24, startY + cardHeight - 68);
+
+        ctx.font = '14px Inter, sans-serif';
+        ctx.fillText(color.name, x + 24, startY + cardHeight - 38);
+      });
+
+      ctx.fillStyle = '#94A3B8';
+      ctx.font = '16px Inter, sans-serif';
+      ctx.fillText('Exported from Aesthetic Palette Generator', 60, 590);
+
+      const link = document.createElement('a');
+      link.download = `palette-${state.currentAesthetic}-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Exported PNG image!');
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+
+      if (e.code === 'Space') {
+        e.preventDefault();
+        generatePalette();
+      } else if (e.key === 's' || e.key === 'S') {
+        e.preventDefault();
+        saveCurrentPalette();
+      } else if (e.key === 'e' || e.key === 'E') {
+        e.preventDefault();
+        toggleModal('export-modal', true);
+      } else if (e.key === 'z' || e.key === 'Z') {
+        if (e.metaKey || e.ctrlKey) {
+          e.preventDefault();
+          handleUndo();
+        }
+      }
+    });
+
+    // Boot Application
+    window.onload = function() {
+      setTheme(state.theme);
+      generatePalette('pastel');
+    };
+  </script>
+</body>
+</html>
